@@ -24,6 +24,8 @@
 %%% -------------------------------------------------------------------
 
 -module(otter_conn_zipkin).
+-include_lib("otter_lib/include/otter.hrl").
+
 -export([
          send_buffer/0,
          store_span/1,
@@ -37,8 +39,8 @@ sup_init() ->
             [named_table, public | TableProps ]
         ) ||
         {Tab, TableProps} <- [
-            {otter_zipkin_buffer1, [{write_concurrency, true}, {keypos, 2}]},
-            {otter_zipkin_buffer2, [{write_concurrency, true}, {keypos, 2}]},
+            {otter_zipkin_buffer1, [{write_concurrency, true}, {keypos, #span.id}]},
+            {otter_zipkin_buffer2, [{write_concurrency, true}, {keypos, #span.id}]},
             {otter_zipkin_status,  [{read_concurrency, true}]}
         ]
     ],
