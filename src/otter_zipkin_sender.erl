@@ -17,22 +17,51 @@
 %%% under the License.
 %%%
 %%%-------------------------------------------------------------------
+-module(otter_zipkin_sender).
 
--module(otter_sup).
--behaviour(supervisor).
+-behaviour(gen_server).
 
--export([start_link/0]).
--export([init/1]).
+-export([
+         start_link/0,
+
+         init/1,
+         handle_call/3,
+         handle_cast/2,
+         handle_info/2,
+
+         code_change/3,
+         terminate/2
+        ]).
 
 -define(SERVER, ?MODULE).
 
+-record(state, {}).
+
 start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 init([]) ->
-    [M:sup_init() || M <- [otter_lib_snapshot_count, otter_conn_zipkin]],
-    {ok, {{one_for_all, 0, 1}, [
-        #{id => otter_zipkin_sender, start => {otter_zipkin_sender, start_link, []}}
-    ]}}.
+    {ok, #state{}, get_time()}.
 
+handle_call(Call, _From, State) ->
+    {stop, {bad_call, Call}, State}.
 
+handle_cast(Cast, State) ->
+    {stop, {bad_cast, Cast}, State}.
+
+handle_info(timeout, State) ->
+    erlang:send_after(get_time(), self(), timeout),
+    case catch otter_conn_zipkin:send_buffer() of
+        Error={'EXIT', _} ->
+            error_logger:error_msg("otter_zipkin_sender: Error: ~p~n", [Error]);
+        _ ->
+            ok
+    end,
+    {noreply, State}.
+
+code_change(_OldVsn, State, _Extra) -> {ok, State}.
+terminate(_Reason, _State) -> ok.
+
+get_time() ->
+    {ok, Time} = application:get_env(zipkin_batch_interval_ms),
+    Time.
