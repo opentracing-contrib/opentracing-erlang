@@ -31,7 +31,7 @@ start_link() ->
 
 init([]) ->
     [M:sup_init() || M <- [otter_lib_snapshot_count, otter_conn_zipkin]],
-    {ok, {{one_for_all, 0, 1}, [
+    {ok, {{one_for_all, 5, 1}, [
         #{id => otter_zipkin_sender, start => {otter_zipkin_sender, start_link, []}}
     ]}}.
 
