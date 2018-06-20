@@ -34,6 +34,7 @@
         ]).
 
 -define(SERVER, ?MODULE).
+-define(DEFAULT_BATCH_INTERVAL, 5000).
 
 -record(state, {}).
 
@@ -63,5 +64,4 @@ code_change(_OldVsn, State, _Extra) -> {ok, State}.
 terminate(_Reason, _State) -> ok.
 
 get_time() ->
-    {ok, Time} = application:get_env(zipkin_batch_interval_ms),
-    Time.
+    application:get_env(otter, zipkin_batch_interval_ms, ?DEFAULT_BATCH_INTERVAL).
