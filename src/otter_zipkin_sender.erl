@@ -34,7 +34,7 @@
         ]).
 
 -define(SERVER, ?MODULE).
--define(DEFAULT_BATCH_INTERVAL, 5000).
+-define(DEFAULT_BATCH_INTERVAL, 1000).
 
 -record(state, {}).
 
