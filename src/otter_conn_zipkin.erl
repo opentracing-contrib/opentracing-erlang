@@ -44,9 +44,7 @@ sup_init() ->
             {otter_zipkin_status,  [{read_concurrency, true}]}
         ]
     ],
-    ets:insert(otter_zipkin_status, {current_buffer, otter_zipkin_buffer1}),
-    SendInterval = otter_config:read(zipkin_batch_interval_ms, 100),
-    timer:apply_interval(SendInterval, ?MODULE, send_buffer, []).
+    ets:insert(otter_zipkin_status, {current_buffer, otter_zipkin_buffer1}).
 
 store_span(Span) ->
     [{_, Buffer}] = ets:lookup(otter_zipkin_status, current_buffer),
